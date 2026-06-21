@@ -6,6 +6,7 @@ from src.recruiter_ranker import rank_candidates
 from src.submission_generator import generate_submission
 from src.evaluation_agent import evaluate_candidate
 from src.comparison_agent import compare_candidates
+from src.hiring_decision_agent import hiring_decision
 
 
 def main():
@@ -31,6 +32,10 @@ def main():
     3+ years experience.
     """
 
+    # -----------------------------
+    # JD Intelligence Agent
+    # -----------------------------
+
     parsed_jd = parse_job_description(
         job_description
     )
@@ -50,6 +55,10 @@ def main():
     print("\nJD Intelligence Agent Output:\n")
     print(jd_analysis)
 
+    # -----------------------------
+    # Retrieval Agent
+    # -----------------------------
+
     hybrid_results = hybrid_search(
         query=query,
         documents=documents,
@@ -57,12 +66,20 @@ def main():
         top_k=50
     )
 
+    # -----------------------------
+    # Recruiter Ranking Agent
+    # -----------------------------
+
     ranked_candidates = rank_candidates(
         hybrid_results=hybrid_results,
         metadata=metadata,
         documents=documents,
         query=query
     )
+
+    # -----------------------------
+    # Evaluation Agent
+    # -----------------------------
 
     print(
         "\nRunning Recruiter Evaluation Agent...\n"
@@ -129,6 +146,10 @@ def main():
         reverse=True
     )
 
+    # -----------------------------
+    # Comparison Agent
+    # -----------------------------
+
     print(
         "\nRunning Candidate Comparison Agent...\n"
     )
@@ -142,7 +163,35 @@ def main():
         "\nComparison Agent Output:\n"
     )
 
-    print(comparison_result)
+    print(
+        comparison_result
+    )
+
+    # -----------------------------
+    # Hiring Decision Agent
+    # -----------------------------
+
+    print(
+        "\nRunning Hiring Decision Agent...\n"
+    )
+
+    decision = hiring_decision(
+        job_description,
+        comparison_result,
+        top_candidates
+    )
+
+    print(
+        "\nHiring Decision:\n"
+    )
+
+    print(
+        decision
+    )
+
+    # -----------------------------
+    # Save Results
+    # -----------------------------
 
     ranked_candidates = top_candidates
 
@@ -153,7 +202,7 @@ def main():
     )
 
     print(
-        "Search completed successfully."
+        "\nSearch completed successfully."
     )
 
 
