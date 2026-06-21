@@ -134,25 +134,36 @@ Produces:
 
 ## System Architecture
 
+```text
 Job Description
-↓
+        │
+        ▼
 JD Intelligence Agent
-↓
+        │
+        ▼
 Hybrid Retrieval Engine
-↓
+        │
+        ▼
 Recruiter Ranking Agent
-↓
+        │
+        ▼
 Skill Gap Analyzer
-↓
+        │
+        ▼
 Explainability Agent
-↓
+        │
+        ▼
 Evaluation Agent
-↓
+        │
+        ▼
 Candidate Comparison Agent
-↓
+        │
+        ▼
 Hiring Decision Agent
-↓
+        │
+        ▼
 Final Candidate Shortlist
+```
 
 ---
 
