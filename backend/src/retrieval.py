@@ -1,52 +1,71 @@
-from sentence_transformers import SentenceTransformer
-from rank_bm25 import BM25Okapi
+from functools import lru_cache
+
 import chromadb
+from rank_bm25 import BM25Okapi
+from sentence_transformers import SentenceTransformer
+
+from src.skill_matcher import normalize_text
 
 
 MODEL_NAME = "all-MiniLM-L6-v2"
 
 
+@lru_cache(maxsize=1)
+def _embedding_model():
+    return SentenceTransformer(MODEL_NAME)
+
+
+def _tokenize(value):
+    return normalize_text(value).split()
+
+
 def semantic_search(query, top_k=20):
-
-    model = SentenceTransformer(MODEL_NAME)
-
+    model = _embedding_model()
     query_embedding = model.encode(query)
 
     client = chromadb.PersistentClient(
         path="../vector_db"
     )
-
     collection = client.get_collection(
         name="candidates"
     )
-
-    results = collection.query(
-        query_embeddings=[query_embedding.tolist()],
-        n_results=top_k
+    result_count = min(
+        max(int(top_k), 1),
+        collection.count(),
     )
 
-    return results
+    if result_count <= 0:
+        return {
+            "ids": [[]],
+            "documents": [[]],
+            "metadatas": [[]],
+            "distances": [[]],
+        }
+
+    return collection.query(
+        query_embeddings=[query_embedding.tolist()],
+        n_results=result_count,
+    )
 
 
 def bm25_search(query, documents, top_k=20):
+    if not documents:
+        return []
 
     tokenized_docs = [
-        doc.lower().split()
-        for doc in documents
+        _tokenize(document)
+        for document in documents
     ]
+    tokenized_query = _tokenize(query)
+
+    if not tokenized_query:
+        return []
 
     bm25 = BM25Okapi(tokenized_docs)
+    scores = bm25.get_scores(tokenized_query)
 
-    tokenized_query = query.lower().split()
-
-    scores = bm25.get_scores(
-        tokenized_query
-    )
-
-    ranked_indices = sorted(
+    return sorted(
         range(len(scores)),
-        key=lambda i: scores[i],
-        reverse=True
+        key=lambda index: scores[index],
+        reverse=True,
     )[:top_k]
-
-    return ranked_indices

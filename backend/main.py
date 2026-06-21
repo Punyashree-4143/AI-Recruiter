@@ -4,6 +4,7 @@ from src.hybrid_search import hybrid_search
 from src.recruiter_ranker import rank_candidates
 from src.submission_generator import generate_submission
 from src.jd_parser import parse_job_description
+from src.jd_intelligence_agent import understand_job_description
 
 
 def main():
@@ -55,14 +56,27 @@ def main():
         job_description
     )
 
+    jd_analysis = understand_job_description(
+        job_description
+    )
+
+    for key in (
+        "role",
+        "required_skills",
+        "preferred_skills",
+        "equivalent_titles",
+        "related_titles",
+        "experience_required",
+    ):
+        if not jd_analysis.get(key):
+            jd_analysis[key] = parsed_jd.get(key)
+
     print("PARSED JD:")
-    print(parsed_jd)
+    print(jd_analysis)
 
     # Convert parsed JD into search query
 
-    query = " ".join(
-        parsed_jd["required_skills"]
-    )
+    query = jd_analysis["search_query"]
 
     print("\nGenerated Search Query:")
     print(query)
@@ -95,7 +109,8 @@ def main():
         hybrid_results=hybrid_results,
         metadata=metadata,
         documents=documents,
-        query=query
+        query=query,
+        role_profile=jd_analysis
     )
 
     print("\nFINAL RECRUITER RANKING\n")
