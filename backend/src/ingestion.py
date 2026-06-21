@@ -7,23 +7,91 @@ def load_and_prepare_data(file_path):
 
     1. documents -> text for embeddings
     2. metadata -> structured filtering data
+
+    Supports:
+    - .json
+    - .jsonl
     """
 
     documents = []
     metadata = []
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        candidates = json.load(f)
+    candidates = []
+
+    # Handle JSONL
+    if file_path.endswith(".jsonl"):
+
+        with open(
+            file_path,
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            for line in f:
+
+                line = line.strip()
+
+                if line:
+                    candidates.append(
+                        json.loads(line)
+                    )
+
+    # Handle JSON
+    elif file_path.endswith(".json"):
+
+        with open(
+            file_path,
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            candidates = json.load(f)
+
+    else:
+        raise ValueError(
+            "Unsupported file format. Use .json or .jsonl"
+        )
+
+    print(
+        f"Loaded {len(candidates)} raw candidates"
+    )
 
     for candidate in candidates:
 
-        profile = candidate.get("profile", {})
-        career_history = candidate.get("career_history", [])
-        education = candidate.get("education", [])
-        skills = candidate.get("skills", [])
-        certifications = candidate.get("certifications", [])
-        languages = candidate.get("languages", [])
-        signals = candidate.get("redrob_signals", {})
+        profile = candidate.get(
+            "profile",
+            {}
+        )
+
+        career_history = candidate.get(
+            "career_history",
+            []
+        )
+
+        education = candidate.get(
+            "education",
+            []
+        )
+
+        skills = candidate.get(
+            "skills",
+            []
+        )
+
+        certifications = candidate.get(
+            "certifications",
+            []
+        )
+
+        languages = candidate.get(
+            "languages",
+            []
+        )
+
+        signals = candidate.get(
+            "redrob_signals",
+            {}
+        )
 
         # Skills
         skill_names = [
@@ -35,25 +103,33 @@ def load_and_prepare_data(file_path):
         career_text = []
 
         for job in career_history:
+
             career_text.append(
                 f"{job.get('title', '')} at "
                 f"{job.get('company', '')}. "
                 f"{job.get('description', '')}"
             )
 
-        career_text = " ".join(career_text)
+        career_text = " ".join(
+            career_text
+        )
 
         # Education
         education_text = []
 
         for edu in education:
+
             education_text.append(
-                f"{edu.get('degree', '')} in "
+                f"{edu.get('degree', '')} "
+                f"in "
                 f"{edu.get('field_of_study', '')} "
-                f"from {edu.get('institution', '')}"
+                f"from "
+                f"{edu.get('institution', '')}"
             )
 
-        education_text = " ".join(education_text)
+        education_text = " ".join(
+            education_text
+        )
 
         # Certifications
         certification_text = ", ".join(
@@ -69,7 +145,8 @@ def load_and_prepare_data(file_path):
 
         # Assessment Scores
         assessment_scores = signals.get(
-            "skill_assessment_scores", {}
+            "skill_assessment_scores",
+            {}
         )
 
         assessment_text = ", ".join(
@@ -142,25 +219,39 @@ Open To Work:
         metadata.append(
             {
                 "candidate_id":
-                    candidate.get("candidate_id"),
+                    candidate.get(
+                        "candidate_id"
+                    ),
 
                 "name":
-                    profile.get("anonymized_name"),
+                    profile.get(
+                        "anonymized_name"
+                    ),
 
                 "location":
-                    profile.get("location"),
+                    profile.get(
+                        "location"
+                    ),
 
                 "country":
-                    profile.get("country"),
+                    profile.get(
+                        "country"
+                    ),
 
                 "current_title":
-                    profile.get("current_title"),
+                    profile.get(
+                        "current_title"
+                    ),
 
                 "industry":
-                    profile.get("current_industry"),
+                    profile.get(
+                        "current_industry"
+                    ),
 
                 "years_of_experience":
-                    profile.get("years_of_experience"),
+                    profile.get(
+                        "years_of_experience"
+                    ),
 
                 "open_to_work":
                     signals.get(
@@ -203,5 +294,9 @@ Open To Work:
                     )
             }
         )
+
+    print(
+        f"Prepared {len(documents)} documents"
+    )
 
     return documents, metadata
