@@ -86,7 +86,7 @@ def run_recruitment_pipeline(job_description):
         "\nRunning Recruiter Evaluation Agent...\n"
     )
 
-    top_candidates = ranked_candidates[:5]
+    top_candidates = ranked_candidates[:10]
 
     for candidate in top_candidates:
 
