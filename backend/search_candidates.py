@@ -25,9 +25,6 @@ def _load_candidate_data():
 
 
 def run_recruitment_pipeline(job_description):
-    print("PROJECT_ROOT =", PROJECT_ROOT)
-    print("DATA_PATH =", DATA_PATH)
-    print("Exists =", DATA_PATH.exists())
     documents, metadata = _load_candidate_data()
 
     # -----------------------------
@@ -89,7 +86,7 @@ def run_recruitment_pipeline(job_description):
         "\nRunning Recruiter Evaluation Agent...\n"
     )
 
-    top_candidates = ranked_candidates[:5]
+    top_candidates = ranked_candidates[:10]
 
     for candidate in top_candidates:
 
